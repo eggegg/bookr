@@ -86,4 +86,47 @@ class BooksControllerTest extends TestCase
         $this->seeStatusCode(201)
                 ->seeHeaderWithRegExp('Location', '#/books/[\d]+$#');
     }
+
+    public function test_update_should_only_change_fillable_fields()
+    {
+        $this->notSeeInDatabase('books', [
+            'title' => 'The War of the Worlds'
+        ]);
+
+        $this->put('/books/1', [
+            'id' => 5,
+            'title' => 'The War of the Worlds',
+            'description' => 'The book is way better than the movie.',
+            'author' => 'Wells, H. G.'
+        ]);
+
+        $this->seeStatusCode(200)
+                ->seeJson([
+                    'id' => 1,
+                    'title' => 'The War of the Worlds',
+                    'description' => 'The book is way better than the movie.',
+                    'author' => 'Wells, H. G.'
+                ])
+                ->seeInDatabase('books', [
+                    'title' => 'The War of the Worlds'
+                ]);
+    }
+
+    public function test_update_should_fail_with_an_invalid_id()
+    {
+        $this->put('/books/99999999999')
+                ->seeStatusCode(404)
+                ->seeJsonEquals([
+                    'error' => [
+                        'message' => 'Book not found'
+                    ]
+                ]);
+    }
+
+    public function test_update_should_not_match_an_invalid_route()
+    {
+        $this->put('/books/this-is-invalid')
+            ->seeStatusCode(404);
+    }
+
 }
