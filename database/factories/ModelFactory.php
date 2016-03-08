@@ -19,3 +19,13 @@ $factory->define(App\User::class, function ($faker) {
         'remember_token' => str_random(10),
     ];
 });
+
+$factory->define(App\Book::class, function($faker) {
+    $title = $faker->sentence(rand(3, 10));
+
+    return [
+        'title' => substr($title, 0, strlen($title) - 1),
+        'description' => $faker->text,
+        'author' => $faker->name
+    ];
+});
